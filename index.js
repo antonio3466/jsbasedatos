@@ -18,7 +18,29 @@ const config = {
 
 
 app.use(express.static('public'));
+app.post('/save-persona',async(req, res)=> {
+  const{apellido, nombre, dni, email, fechaNacimiento} = data.body;
+  try{
+    await sql.connect(config);
+    const request = sql.Request();
+    request.input('apellido', sql.VarChar, apellido);
+    request.input('nombre', sql.VarChar, nombre);
+    request.input('email', sql.VarChar, email);
+    request.input('dni', sql.VarChar, dni);
+    request.input('fechaNacimiento', sql.VarChar, fechaNacimiento);
+    const result = request.query(
+      'INSERT INTO Persona ( Nombre, Apellido, DNI, Email, FechaNacimiento) VALUE (@nombre, @apellido, @email, @dni, @fechaNacimiento)'
+    );
+    console.log(result);
+    res.send('Datos guardados exitosamente! ');
 
+  }catch(err){
+    console.error('Error al guardar los datos:', err);
+    res.status(500).send('Hubo un error al guardar los datos.');
+  }finally{
+    sql.close();
+  }
+});
 //app.use(cors()); // Permite todas las solicitudes desde cualquier origen
 
 app.get('/api/datos', async (req, res) => {
@@ -31,8 +53,18 @@ app.get('/api/datos', async (req, res) => {
   }
 });
 
+app.get('/api/personas', async (req, res) => {
+  try {
+    await sql.connect(config);
+    const result = await sql.query('SELECT * FROM Personas');
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
 app.get("/api/usuarios", async (req, res) =>{
-   try {
+  try {
     const response = await fetch("https://jsonplaceholder.typicode.com/posts");
     const data = await response.json();
     res.json(data); //uso res.json() para enviar la respuesta json
