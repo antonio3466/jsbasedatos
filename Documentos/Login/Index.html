@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Inicia sesión en Netflix de Libros para acceder a tu catálogo digital de libros favoritos.">
+    <title>Iniciar Sesión - Netflix de Libros</title>
+    <link rel="stylesheet" href="Estilos.css">
+</head>
+
+<body>
+    <main class="login">
+        <h2>Iniciar Sesión</h2>
+        <form id="login-form">
+            <div class="campo flotante">
+                <input type="email" id="email" name="email" placeholder=" " required>
+                <label for="email">Email o número de teléfono</label>
+            </div>
+            <div class="campo flotante">
+                <input type="password" id="password" name="password" placeholder=" " required minlength="8">
+                <label for="password">Contraseña</label>
+            </div>
+            <button type="submit">Iniciar Sesión</button>
+            <div id="error-message" class="error" style="display: none; color: #e50914; margin-top: 1rem;">
+                Por favor, verifica tu email o contraseña.
+            </div>
+        </form>
+    </main>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (email && password.length >= 8) {
+                window.location.href = 'NetflixDeLibros.html';
+            } else {
+                document.getElementById('error-message').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+
+</html>
