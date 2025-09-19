@@ -5,17 +5,37 @@ document.getElementById("retroceder").addEventListener("click", function() {
 })
 
 document.getElementById("grabar").addEventListener('click', async()=>{
-    
-    const nombre = document.getElementById("nombre").value;
-    const apellido = document.getElementById("apellido").value;
+
+    const Nombre = document.getElementById("Nombre").value;
+    const Apellido = document.getElementById("Apellido").value;
     const dni = document.getElementById("dni").value;
     const email = document.getElementById("email").value;
-    const fechaNacimeminto = document.getElementById("fechaNacimiento").value;
+    const FechaNacimiento = document.getElementById("FechaNacimiento").value;
     const data = {
-        nombre : nombre,
-        apellido: apellido,
-        email: email,
+        Nombre : Nombre,
+        Apellido: Apellido,
         dni: dni,
-        fechaNacimeminto: fechaNacimeminto
+        email: email,
+        FechaNacimiento: FechaNacimiento
     };
-})
+    console.log(data);
+    try {
+
+        const response = await fetch("/save-personas", {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)  //send data as json
+    });
+     const result = await response.text();
+     alert(result);  // show a confirmation message
+     console.log(result); 
+      window.location.href = "./index.html";
+    }
+     catch (error) {
+        console.error("Error:", error);
+        alert("hubo un error al guardar los datos.");
+     }
+});
+    

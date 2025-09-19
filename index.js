@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const sql = require('mssql');
 const app = express();
 app.use(express.json());
@@ -18,27 +19,37 @@ const config = {
 
 
 app.use(express.static('public'));
-app.post('/save-persona',async(req, res)=> {
-  const{apellido, nombre, dni, email, fechaNacimiento} = data.body;
+
+
+app.use(cors()); // permite todas las solisitudes
+
+
+
+
+app.post('/save-personas', async(req, res)=> {
+
+  const {Nombre, Apellido,  dni, email, FechaNacimiento} = req.body;
+  //const {Apellido, Nombre, DNI, Email, FechaNacimiento} = req.body;
   try{
-    await sql.connect(config);
-    const request = sql.Request();
-    request.input('apellido', sql.VarChar, apellido);
-    request.input('nombre', sql.VarChar, nombre);
-    request.input('email', sql.VarChar, email);
-    request.input('dni', sql.VarChar, dni);
-    request.input('fechaNacimiento', sql.VarChar, fechaNacimiento);
-    const result = request.query(
-      'INSERT INTO Persona ( Nombre, Apellido, DNI, Email, FechaNacimiento) VALUE (@nombre, @apellido, @email, @dni, @fechaNacimiento)'
-    );
-    console.log(result);
-    res.send('Datos guardados exitosamente! ');
+        await sql.connect(config);
+        const request = new sql.Request();
+        request.input('Nombre', sql.VarChar, Nombre);
+        request.input('Apellido', sql.VarChar, Apellido);
+        request.input('dni', sql.VarChar, dni);
+        request.input('email', sql.VarChar, email);
+        request.input('FechaNacimiento', sql.VarChar, FechaNacimiento);
+        const result = await request.query(
+          'INSERT INTO Personas ( Nombre, Apellido, DNI, Email, FechaNacimiento) VALUES (@Nombre, @Apellido, @dni,  @email, @FechaNacimiento)'
+        );
+        console.log(result);
+        res.send('Datos guardados exitosamente! ');
+       
 
   }catch(err){
-    console.error('Error al guardar los datos:', err);
-    res.status(500).send('Hubo un error al guardar los datos.');
+        console.error('Error al guardar los datos:', err);
+        res.status(500).send('Hubo un error al guardar los datos.');
   }finally{
-    sql.close();
+        sql.close();
   }
 });
 //app.use(cors()); // Permite todas las solicitudes desde cualquier origen
