@@ -74,6 +74,18 @@ app.get('/api/personas', async (req, res) => {
   }
 });
 
+app.get('/api/personasid/:id', async (req, res) => {
+  try {
+    const personaid = req.params.id;
+    await sql.connect(config);
+    const result = await sql.query(`exec sp_consultarPersona  ${personaid}`);
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
+
 app.get("/api/usuarios", async (req, res) =>{
   try {
     const response = await fetch("https://jsonplaceholder.typicode.com/posts");
