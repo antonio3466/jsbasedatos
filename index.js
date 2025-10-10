@@ -42,7 +42,7 @@ app.post('/save-personas', async(req, res)=> {
           'INSERT INTO Personas ( Nombre, Apellido, DNI, Email, FechaNacimiento) VALUES (@Nombre, @Apellido, @dni,  @email, @FechaNacimiento)'
         );
         console.log(result);
-        res.send('Datos guardados exitosamente! ');
+        res.send('Datos guardadosapi/personasid exitosamente! ');
        
 
   }catch(err){
@@ -96,6 +96,44 @@ app.get("/api/usuarios", async (req, res) =>{
 }
 })
   
+// Actualizar  persona
+app.put('/api/personasid/:id', async (req, res) => {
+  const id = req.params.id;
+  const { Nombre, Apellido, DNI, Email, FechaNacimiento } = req.body;
+
+  try {
+    await sql.connect(config);
+    const request = new sql.Request();
+
+    request.input('id', sql.Int, id);
+    request.input('Nombre', sql.VarChar, Nombre);
+    request.input('Apellido', sql.VarChar, Apellido);
+    request.input('DNI', sql.VarChar, DNI);
+    request.input('Email', sql.VarChar, Email);
+    request.input('FechaNacimiento', sql.VarChar, FechaNacimiento);
+
+    const result = await request.query(`
+      UPDATE Personas 
+      SET Nombre = @Nombre, 
+          Apellido = @Apellido, 
+          DNI = @DNI, 
+          Email = @Email, 
+          FechaNacimiento = @FechaNacimiento
+      WHERE PersonaID = @id
+    `);
+
+    if (result.rowsAffected[0] = 0) {
+      return res.status(404).send('No se encontró una persona con ese ID.');
+    }
+
+    res.send('Datos actualizados correctamente.');
+  } catch (err) {
+    console.error('Error al actualizar los datos:', err);
+    res.status(500).send('Hubo un error al actualizar los datos.');
+  } finally {
+    sql.close();
+  }
+});
 
 
 
