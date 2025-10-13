@@ -9,12 +9,22 @@ new gridjs.Grid({
         { id: "Operacion", name: "Operacion" ,
         
         formatter: (cell, row) => {
-            const PersonaID = row.cells[0].data;
-            return gridjs.html(`<a href="./modificardatos.html?parametros=${PersonaID}">link</a`);
-         }
-        } 
-    
-      ],
+             const personaId = row.cells[0].data; 
+             return gridjs.html(`<a href="./modificarDatos.html?parametro=${personaId}" 
+                         target="_blank" style="text-decoration: none;">
+                            <i class="fa-solid fa-pen-to-square mi-icono-grande"
+                            style="text-decoration: none;"
+                            ></i> </a>
+                            <a href="./modificarDatos.html?parametro=${personaId}" 
+                            target="_blank" style="text-decoration: none;">
+                            <i class="fa-solid fa-trash mi-icono-grande"
+                            
+                            style="color: #FF6347; "
+                            ></i> </a>`);
+            }
+        }
+       
+    ],
     
         sort: true,
         server: {
