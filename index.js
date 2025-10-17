@@ -21,38 +21,9 @@ const config = {
 app.use(express.static('public'));
 
 
-app.use(cors()); // permite todas las solisitudes
+app.use(cors()); // Permite todas las solicitudes desde cualquier origen
 
-
-
-
-app.post('/save-personas', async(req, res)=> {
-
-  const {Nombre, Apellido,  dni, email, FechaNacimiento} = req.body;
-  //const {Apellido, Nombre, DNI, Email, FechaNacimiento} = req.body;
-  try{
-        await sql.connect(config);
-        const request = new sql.Request();
-        request.input('Nombre', sql.VarChar, Nombre);
-        request.input('Apellido', sql.VarChar, Apellido);
-        request.input('dni', sql.VarChar, dni);
-        request.input('email', sql.VarChar, email);
-        request.input('FechaNacimiento', sql.VarChar, FechaNacimiento);
-        const result = await request.query(
-          'INSERT INTO Personas ( Nombre, Apellido, DNI, Email, FechaNacimiento) VALUES (@Nombre, @Apellido, @dni,  @email, @FechaNacimiento)'
-        );
-        console.log(result);
-        res.send('Datos guardadosapi/personasid exitosamente! ');
-       
-
-  }catch(err){
-        console.error('Error al guardar los datos:', err);
-        res.status(500).send('Hubo un error al guardar los datos.');
-  }finally{
-        sql.close();
-  }
-});
-//app.use(cors()); // Permite todas las solicitudes desde cualquier origen
+/* APIs Que no estoy usando */
 
 app.get('/api/datos', async (req, res) => {
   try {
@@ -64,78 +35,170 @@ app.get('/api/datos', async (req, res) => {
   }
 });
 
+app.post('/save-data', async (req, res) => {
+    const { codigoDia, descripcionDia } = req.body;
+
+    try {
+        await sql.connect(config);
+        const request = new sql.Request();
+
+        // Use parameterized queries to prevent SQL injection
+        request.input('codigoDia', sql.VarChar, codigoDia);
+        request.input('descripcionDia', sql.VarChar, descripcionDia);
+
+        const result = await request.query(
+            'INSERT INTO Dias (codigoDia, descripcionDia) VALUES (@codigoDia, @descripcionDia)'
+        );
+
+        console.log(result);
+        res.send('Datos guardados exitosamente!');
+    } catch (err) {
+        console.error('Error al guardar los datos:', err);
+        res.status(500).send('Hubo un error al guardar los datos.');
+    } finally {
+        sql.close();
+    }
+});
+
+
+app.get('/api/usuarios', async (req, res) => {
+    try {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+        const data = await response.json();
+        res.json(data); // Usa res.json() para enviar la respuesta JSON
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+
+/* APIs que sí estoy usando en mi proyecto */
+
 app.get('/api/personas', async (req, res) => {
   try {
     await sql.connect(config);
-    const result = await sql.query('SELECT * FROM Personas');
+    const result = await sql.query('SELECT * FROM personas');
     res.json(result.recordset);
   } catch (err) {
     res.status(500).send(err.message);
   }
 });
 
-app.get('/api/personasid/:id', async (req, res) => {
+app.get('/api/personasId/:id', async (req, res) => {
   try {
-    const personaid = req.params.id;
+    const personaId = req.params.id;
     await sql.connect(config);
-    const result = await sql.query(`exec sp_consultarPersona  ${personaid}`);
+    const result = await sql.query(`exec sp_consultarPersona ${personaId}`);
     res.json(result.recordset);
   } catch (err) {
     res.status(500).send(err.message);
   }
 });
 
-
-app.get("/api/usuarios", async (req, res) =>{
+app.get('/api/eliminarPersonasId/:id', async (req, res) => {
   try {
-    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
-    const data = await response.json();
-    res.json(data); //uso res.json() para enviar la respuesta json
-} catch (err) {
-  res.status(500).send(err.message);
-}
-})
-  
-// Actualizar  persona
-app.put('/api/personasid/:id', async (req, res) => {
-  const id = req.params.id;
-  const { Nombre, Apellido, DNI, Email, FechaNacimiento } = req.body;
-
-  try {
+    const personaId = req.params.id;
+    // Conexión a la base de datos
     await sql.connect(config);
-    const request = new sql.Request();
-
-    request.input('id', sql.Int, id);
-    request.input('Nombre', sql.VarChar, Nombre);
-    request.input('Apellido', sql.VarChar, Apellido);
-    request.input('DNI', sql.VarChar, DNI);
-    request.input('Email', sql.VarChar, Email);
-    request.input('FechaNacimiento', sql.VarChar, FechaNacimiento);
-
-    const result = await request.query(`
-      UPDATE Personas 
-      SET Nombre = @Nombre, 
-          Apellido = @Apellido, 
-          DNI = @DNI, 
-          Email = @Email, 
-          FechaNacimiento = @FechaNacimiento
-      WHERE PersonaID = @id
-    `);
-
-    if (result.rowsAffected[0] = 0) {
-      return res.status(404).send('No se encontró una persona con ese ID.');
+    
+    // Ejecutar la consulta DELETE
+    const result = await sql.query(`delete from personas where PersonaID = ${personaId}`);
+    
+    // 💡 CORRECCIÓN CRÍTICA: 
+    // Verificar rowsAffected para confirmar la eliminación y enviar un JSON de éxito.
+    // rowsAffected es un array que contiene el número de filas afectadas.
+    if (result.rowsAffected && result.rowsAffected[0] > 0) {
+      
+      // La persona fue eliminada con éxito
+      res.json({ 
+        success: true, 
+        message: `Persona con ID ${personaId} eliminada correctamente.`,
+        deletedId: personaId
+      });
+      
+    } else {
+      
+      // No se eliminaron filas (probablemente la PersonaID no existe)
+      res.status(404).json({ 
+        success: false, 
+        message: `No se encontró la persona con ID ${personaId} para eliminar.` 
+      });
     }
-
-    res.send('Datos actualizados correctamente.');
   } catch (err) {
-    console.error('Error al actualizar los datos:', err);
-    res.status(500).send('Hubo un error al actualizar los datos.');
-  } finally {
-    sql.close();
+    // Manejo de errores de conexión o SQL
+    res.status(500).json({ 
+        success: false, 
+        message: `Error interno del servidor: ${err.message}` 
+    });
   }
 });
 
+app.post('/save-persona', async (req, res) => {
+    const { apellido, nombre, dni, email, fechaNacimiento } = req.body;
+
+    try {
+        await sql.connect(config);
+        const request = new sql.Request();
+
+        // Use parameterized queries to prevent SQL injection
+        request.input('apellido', sql.VarChar, apellido);
+        request.input('nombre', sql.VarChar, nombre);
+        request.input('dni', sql.VarChar, dni);
+        request.input('email', sql.VarChar, email);
+        request.input('fechaNacimiento', sql.VarChar, fechaNacimiento);
+
+        const result = await request.query(
+            'INSERT INTO Personas (Nombre, Apellido, DNI, Email, FechaNacimiento) VALUES (@nombre,@apellido, @dni, @email, @fechaNacimiento)'
+        );
+
+        console.log(result);
+        res.send('Datos guardados exitosamente!');
+    } catch (err) {
+        console.error('Error al guardar los datos:', err);
+        res.status(500).send('Hubo un error al guardar los datos.');
+    } finally {
+        sql.close();
+    }
+});
 
 
+app.post('/save-Actualizarpersona', async (req, res) => {
+    console.log('estoy en ...')
+    const { id, apellido, nombre, dni, email, fechaNacimiento } = req.body;
 
-app.listen(4000, () => console.log('Servidor corriendo en puerto 4000'));
+    try {
+        await sql.connect(config);
+        const request = new sql.Request();
+
+        // Use parameterized queries to prevent SQL injection
+        request.input('id', sql.VarChar, id);
+        request.input('apellido', sql.VarChar, apellido);
+        request.input('nombre', sql.VarChar, nombre);
+        request.input('dni', sql.VarChar, dni);
+        request.input('email', sql.VarChar, email);
+        request.input('fechaNacimiento', sql.VarChar, fechaNacimiento);
+
+        
+        const result = await request.query(
+            `update personas 
+                set Nombre = @nombre,
+                    Apellido = @apellido, 
+                    DNI = @dni,
+                    Email = @email,
+                    FechaNacimiento = @fechaNacimiento
+                where PersonaID	=  @id`
+        );
+
+        console.log(result);
+        res.send('Datos guardados exitosamente!');
+    } catch (err) {
+        console.error('Error al guardar los datos:', err);
+        res.status(500).send('Hubo un error al guardar los datos.');
+    } finally {
+        sql.close();
+    }
+});
+
+
+app.listen(3000, () => console.log('Servidor corriendo en puerto 3000'));
+//app.listen(3000, '0.0.0.0', () => console.log('Servidor corriendo en puerto 3000'));
