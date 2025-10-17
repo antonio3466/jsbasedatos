@@ -97,6 +97,61 @@ app.get("/api/usuarios", async (req, res) =>{
 })
   
 
+app.post('/save-Actualizapersonas', async(req, res)=> {
+
+  const {id, Nombre, Apellido,  dni, email, FechaNacimiento} = req.body;
+  //const {Apellido, Nombre, DNI, Email, FechaNacimiento} = req.body;
+  try{
+        await sql.connect(config);
+        const request = new sql.Request();
+        request.input('id', sql.VarChar, id);
+        request.input('Nombre', sql.VarChar, Nombre);
+        request.input('Apellido', sql.VarChar, Apellido);
+        request.input('dni', sql.VarChar, dni);
+        request.input('email', sql.VarChar, email);
+        request.input('FechaNacimiento', sql.VarChar, FechaNacimiento);
+        const result = await request.query(
+            `update Personas
+                  set Nombre = @Nombre, 
+                  Apellido = @Apellido, 
+                  DNI = @dni, 
+                  Email =  @email, 
+                  FechaNacimiento = @FechaNacimiento
+                where PersonaID = @id`
+          //'INSERT INTO Personas ( Nombre, Apellido, DNI, Email, FechaNacimiento) VALUES (@Nombre, @Apellido, @dni,  @email, @FechaNacimiento)'
+        );
+        console.log(result);
+        res.send('Datos guardados exitosamente! ');
+       
+
+  }catch(err){
+        console.error('Error al guardar los datos:', err);
+        res.status(500).send('Hubo un error al guardar los datos.');
+  }finally{
+        sql.close();
+  }
+});
+
+app.delete('/api/personas/:id', async (req, res) => {
+    const id = req.params.id;  // Obtener el ID de la URL
+    try {
+        await sql.connect(config);  // Asegúrate de que getConnection() esté definida como antes
+        const request = new sql.Request();
+        request.input('id', sql.Int, id);  // Parametrizar para seguridad
+        const result = await request.query('DELETE FROM Personas WHERE PersonaID = @id');
+        
+        if (result.rowsAffected[0] > 0) {
+            res.json({ message: 'Registro eliminado exitosamente!' });
+        } else {
+            res.status(404).json({ message: 'Registro no encontrado.' });
+        }
+    } catch (err) {
+        console.error('Error al eliminar:', err);
+        res.status(500).json({ error: 'Hubo un error al eliminar el registro.', details: err.message });
+    } finally {
+        await sql.close();
+    }
+});
 
 
 
