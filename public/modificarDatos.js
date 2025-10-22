@@ -1,8 +1,8 @@
 console.log('Llegué a modificar datos');
 
 // Obtener ID de la URL
-const parametros = new URLSearchParams(window.location.search);
-const id = parametros.get("parametros");
+const parametro = new URLSearchParams(window.location.search);
+const id = parametro.get("parametro");
 
 console.log("ID recibido:",id);
 
@@ -57,13 +57,12 @@ fetch(url)
     
     try {
 
-        const response = await fetch("/save-Actualizapersonas", {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)  //send data as json
-    });
+const response = await fetch("http://localhost:4000/save-Actualizapersonas", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+});
+
      const result = await response.text();
      alert(result);  // show a confirmation message
      console.log(result); 
