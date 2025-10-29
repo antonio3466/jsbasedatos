@@ -11,7 +11,7 @@ router.get('/', personaController.getPersonas);
 router.get('/:id', personaController.getPersonaById); 
 // POST /api/personas
 router.post('/', personaController.createPersona); 
-// PUT /api/personas/update (Alternativa para PUT, aunque POST podría usarse para crear/actualizar)
+// POST /api/personas/update (Alternativa para PUT, aunque POST podría usarse para crear/actualizar)
 router.post('/update', personaController.updatePersona); 
 // DELETE /api/personas/:id
 router.delete('/:id', personaController.deletePersonaById);

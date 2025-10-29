@@ -7,12 +7,13 @@ const id = parametro.get("parametro");
 console.log("ID recibido:",id);
 
 // URL de la API
-const url = 'http://localhost:4000/api/personasid/' + id;
+//const url = 'http://localhost:4000/api/personasid/' + id;
+const url = 'http://localhost:4000/api/personas/';
 
 console.log(url);
 
 // Obtener datos existentes
-fetch(url)
+fetch(url + id)
   .then(response => {
     if (!response.ok) {
       throw new Error(`Error en la red: ${response.statusText}`);
@@ -57,7 +58,7 @@ fetch(url)
     
     try {
 
-const response = await fetch("http://localhost:4000/save-Actualizapersonas", {
+const response = await fetch(url + 'update', {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)

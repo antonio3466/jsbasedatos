@@ -18,10 +18,14 @@ document.getElementById("grabar").addEventListener('click', async()=>{
         email: email,
         FechaNacimiento: FechaNacimiento
     };
-    console.log(data);
+
+
+
+    const urlApi = "http://localhost:4000/api/personas"
+
     try {
 
-        const response = await fetch("/save-personas", {
+        const response = await fetch(urlApi, {
         method: "POST",
         headers: {
         "Content-Type": "application/json"
