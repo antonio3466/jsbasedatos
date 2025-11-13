@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adivina el Número</title>
+</head>
+<body>
+
+  <h1>Adivina el número</h1>
+  <p>He pensado un número entre 1 y 100</p>
+  <p>intenta adivinar</p>
+
+  <input type="number" id="guessInput" min="1" max="100">
+  <button onclick="adivinarNumero()">Intentar</button>
+
+  <p id="feedback"></p>
+  <p id="attempts">Intentos: 0</p>
+
+  <script src="adivinador.js"></script>
+</body>
+</html>
